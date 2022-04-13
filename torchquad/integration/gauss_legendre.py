@@ -60,6 +60,10 @@ class GaussLegendre(BaseIntegrator):
             a,b=self._integration_domain.T
             xm=0.5*(b+a)
             xl=0.5*(b-a)
+            if isinstance(xm,torch.Tensor):
+                #for now... figure out a better solution later
+                xi=torch.from_numpy(xi)
+                wi=torch.from_numpy(wi)
             xi=do("repeat",xm,npoints,like="numpy").reshape(self._dim,npoints)+anp.outer(xl,xi) #anp.repeat(xm,npoints).reshape(self._dim,npoints)+anp.outer(xl,xi)
             wi=anp.outer(wi,xl).T
             
