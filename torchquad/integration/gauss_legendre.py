@@ -1,6 +1,7 @@
 import torch
 from loguru import logger
 from autoray import numpy as anp
+from autoray import do
 
 from .base_integrator import BaseIntegrator
 from .utils import _setup_integration_domain
@@ -14,7 +15,7 @@ class GaussLegendre(BaseIntegrator):
         
     def _gauss_legendre(self,n):
         """returns Gauss-Legendre points and weights for degree n and dimension self._dim"""
-        return anp.polynomial.legendre.leggauss(n)
+        return do("polynomial.legendre.leggauss",n,like="numpy")#anp.polynomial.legendre.leggauss(n)
 
     def integrate(self, fn, dim, args=None, N=2, eps_abs=None, eps_rel=1e-3, max_N=12, base=2, integration_domain=None, fixed=False):
         """Integrates the passed function on the passed domain using Gauss-Legendre quadrature.
