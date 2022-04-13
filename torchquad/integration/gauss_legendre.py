@@ -67,7 +67,11 @@ class GaussLegendre(BaseIntegrator):
                 wi=aa.new(wi)
                 #xi=torch.from_numpy(xi).cuda(torch.cuda.current_device())
                 #wi=torch.from_numpy(wi).cuda(torch.cuda.current_device())
-            xi=do("repeat",xm,npoints,like="numpy").reshape(self._dim,npoints)+anp.outer(xl,xi) #anp.repeat(xm,npoints).reshape(self._dim,npoints)+anp.outer(xl,xi)
+            try:
+                xi=do("repeat",xm,npoints,like="numpy").reshape(self._dim,npoints)+anp.outer(xl,xi)
+                #now xm has to be on CPU ... but xi needs to be on GPU
+            except TypeError:
+                xi=do("repeat",xm.cpu(),npoints,like="numpy").reshape(self._dim,npoints)+anp.outer(xl,xi)
             wi=anp.outer(wi,xl).T
             
             logger.debug("Evaluating integrand for {xi}.")
