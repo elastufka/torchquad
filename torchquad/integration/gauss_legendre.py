@@ -14,7 +14,7 @@ class GaussLegendre(BaseIntegrator):
         
     def _gauss_legendre(self,n):
         """returns Gauss-Legendre points and weights for degree n and dimension self._dim"""
-        return np.polynomial.legendre.leggauss(n)
+        return anp.polynomial.legendre.leggauss(n)
 
     def integrate(self, fn, dim, args=None, N=2, eps_abs=None, eps_rel=1e-3, max_N=12, base=2, integration_domain=None, fixed=False):
         """Integrates the passed function on the passed domain using Gauss-Legendre quadrature.
@@ -74,14 +74,14 @@ class GaussLegendre(BaseIntegrator):
             #print(npoints,integral)
             # Convergence criterion
             if self._nr_of_fevals//self._dim > 1:
-                l1 = np.abs(integral - lastsum)
+                l1 = anp.abs(integral - lastsum)
                 if eps_abs is not None:
-                    i = np.where(l1 > eps_abs)[0]
+                    i = anp.where(l1 > eps_abs)[0]
                 if eps_rel is not None:
                     l2 = eps_rel * np.abs(integral)
-                    i = np.where(l1 > l2)[0]
+                    i = anp.where(l1 > l2)[0]
             else:
-                i= np.arange(self._dim) #indices of integral
+                i= anp.arange(self._dim) #indices of integral
 
             # If all point have reached criterion return value
             if i.size == 0:
