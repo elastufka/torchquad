@@ -90,7 +90,7 @@ class GaussLegendre(BaseIntegrator):
                 if eps_abs is not None:
                     i = anp.where(l1 > eps_abs)[0]
                 if eps_rel is not None:
-                    l2 = eps_rel * np.abs(integral)
+                    l2 = eps_rel * anp.abs(integral)
                     i = anp.where(l1 > l2)[0]
             else:
                 i= anp.arange(self._dim) #indices of integral
