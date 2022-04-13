@@ -77,7 +77,7 @@ class GaussLegendre(BaseIntegrator):
             logger.debug("Evaluating integrand for {xi}.")
             if self._nr_of_fevals > 0:
                 lastsum = anp.array(integral)
-                integral[i] = anp.sum(self._eval(xi[i], args=args)*wi[i],axis=1)
+                integral[i] = anp.sum(self._eval(xi[i], args=[a[i.tolist()] for a in args])*wi[i],axis=1)
             else:
                 integral = torch.sum(self._eval(xi,args=args)*wi,axis=1) #integral from a to b f(x) ≈ sum (w_i*f(x_i))
                 if fixed:
