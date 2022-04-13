@@ -60,7 +60,7 @@ class GaussLegendre(BaseIntegrator):
             a,b=self._integration_domain.T
             xm=0.5*(b+a)
             xl=0.5*(b-a)
-            xi=anp.repeat(xm,npoints).reshape(self._dim,npoints)+anp.outer(xl,xi)
+            xi=do("repeat",xm,npoints,like="numpy").reshape(self._dim,npoints)+anp.outer(xl,xi) #anp.repeat(xm,npoints).reshape(self._dim,npoints)+anp.outer(xl,xi)
             wi=anp.outer(wi,xl).T
             
             logger.debug("Evaluating integrand for {xi}.")
