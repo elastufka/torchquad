@@ -62,8 +62,8 @@ class GaussLegendre(BaseIntegrator):
             xl=0.5*(b-a)
             if isinstance(xm,torch.Tensor):
                 #for now... figure out a better solution later
-                xi=torch.from_numpy(xi)
-                wi=torch.from_numpy(wi)
+                xi=torch.from_numpy(xi).cuda(torch.cuda.current_device())
+                wi=torch.from_numpy(wi).cuda(torch.cuda.current_device())
             xi=do("repeat",xm,npoints,like="numpy").reshape(self._dim,npoints)+anp.outer(xl,xi) #anp.repeat(xm,npoints).reshape(self._dim,npoints)+anp.outer(xl,xi)
             wi=anp.outer(wi,xl).T
             
