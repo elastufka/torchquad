@@ -89,6 +89,8 @@ class GaussLegendre(BaseIntegrator):
         lastsum = anp.sum(all_eval[:self._dim*base**N].reshape(self._dim,base**N),axis=1) #anp.array(integral)
         if fixed:
             return lastsum
+            
+        integral=anp.zeros_like(lastsum)
         i= anp.arange(self._dim)
         #try foor loop to start
         for ires in range(N+1, max_N + 1):
