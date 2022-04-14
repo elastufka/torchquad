@@ -46,58 +46,57 @@ class GaussLegendre(BaseIntegrator):
 
         self._dim = dim
         self._fn = fn
+        with torch.no_grad():
+            for ires in range(N, max_N + 1): #if starting at npoints=8
+                npoints = base ** ires #is this standard?
+                #print(f"npoints {npoints}")
+                if npoints > base**max_N:
+                    raise ValueError(f"Integral did not satisfy the conditions eps_abs={eps_abs} or eps_rel={eps_rel} using the maximum number of points {base**max_N}") #or a different error?
+                    break
 
-        for ires in range(N, max_N + 1): #if starting at npoints=8
-            npoints = base ** ires #is this standard?
-            #print(f"npoints {npoints}")
-            if npoints > base**max_N:
-                raise ValueError(f"Integral did not satisfy the conditions eps_abs={eps_abs} or eps_rel={eps_rel} using the maximum number of points {base**max_N}") #or a different error?
-                break
+                # generate positions and weights
+                xi, wi = self._gauss_legendre(npoints)  #(dim,n)
+                #scale from [-1,1] to [a,b] e.g. https://en.wikipedia.org/wiki/Gaussian_quadrature#Change_of_interval
+                a,b=self._integration_domain.T
+                xm=0.5*(b+a)
+                xl=0.5*(b-a)
+                if isinstance(xm,torch.Tensor):
+                    #for now... figure out a better solution later
+                    aa=torch.randn(npoints)
+                    xi=aa.new(xi)
+                    wi=aa.new(wi)
 
-            # generate positions and weights
-            xi, wi = self._gauss_legendre(npoints)  #(dim,n)
-            #scale from [-1,1] to [a,b] e.g. https://en.wikipedia.org/wiki/Gaussian_quadrature#Change_of_interval
-            a,b=self._integration_domain.T
-            xm=0.5*(b+a)
-            xl=0.5*(b-a)
-            if isinstance(xm,torch.Tensor):
-                #for now... figure out a better solution later
-                aa=torch.randn(npoints)
-                xi=aa.new(xi)
-                wi=aa.new(wi)
-                #xi=torch.from_numpy(xi).cuda(torch.cuda.current_device())
-                #wi=torch.from_numpy(wi).cuda(torch.cuda.current_device())
-            try:
-                xi=do("repeat",xm,npoints,like="numpy").reshape(self._dim,npoints)+anp.outer(xl,xi)
-                #now xm has to be on CPU ... but xi needs to be on GPU
-            except TypeError:
-                xi=do("repeat",xm.cpu(),npoints,like="numpy").reshape(self._dim,npoints).to(torch.cuda.current_device())+anp.outer(xl,xi)
-            wi=anp.outer(wi,xl).T
-            
-            logger.debug("Evaluating integrand for {xi}.")
-            if self._nr_of_fevals > 0:
-                lastsum = anp.array(integral)
-                integral[i] = anp.sum(self._eval(xi[i], args=[a[i.tolist()] for a in args])*wi[i],axis=1)
-            else:
-                integral = torch.sum(self._eval(xi,args=args)*wi,axis=1) #integral from a to b f(x) ≈ sum (w_i*f(x_i))
-                if fixed:
-                    break #no error evaluation if fixed-point quadrature desired
+                try:
+                    xi=do("repeat",xm,npoints,like="numpy").reshape(self._dim,npoints)+anp.outer(xl,xi)
+                    #now xm has to be on CPU ... but xi needs to be on GPU
+                except TypeError:
+                    xi=do("repeat",xm.cpu(),npoints,like="numpy").reshape(self._dim,npoints).to(torch.cuda.current_device())+anp.outer(xl,xi)
+                wi=anp.outer(wi,xl).T
+                
+                logger.debug("Evaluating integrand for {xi}.")
+                if self._nr_of_fevals > 0:
+                    lastsum = anp.array(integral)
+                    integral[i] = anp.sum(self._eval(xi[i], args=args)*wi[i],axis=1) #[a[i.tolist()] for a in args]
+                else:
+                    integral = torch.sum(self._eval(xi,args=args)*wi,axis=1) #integral from a to b f(x) ≈ sum (w_i*f(x_i))
+                    if fixed:
+                        break #no error evaluation if fixed-point quadrature desired
 
-            #print(npoints,integral)
-            # Convergence criterion
-            if self._nr_of_fevals//self._dim > 1:
-                l1 = anp.abs(integral - lastsum)
-                if eps_abs is not None:
-                    i = anp.where(l1 > eps_abs)[0]
-                if eps_rel is not None:
-                    l2 = eps_rel * anp.abs(integral)
-                    i = anp.where(l1 > l2)[0]
-            else:
-                i= anp.arange(self._dim) #indices of integral
+                #print(npoints,integral)
+                # Convergence criterion
+                if self._nr_of_fevals//self._dim > 1:
+                    l1 = anp.abs(integral - lastsum)
+                    if eps_abs is not None:
+                        i = anp.where(l1 > eps_abs)[0]
+                    if eps_rel is not None:
+                        l2 = eps_rel * anp.abs(integral)
+                        i = anp.where(l1 > l2)[0]
+                else:
+                    i= anp.arange(self._dim) #indices of integral
 
-            # If all point have reached criterion return value
-            if i.size == 0:
-                break
+                # If all point have reached criterion return value
+                if i.size == 0:
+                    break
 
         logger.info(f"Computed integral was {integral}.")
         return integral
