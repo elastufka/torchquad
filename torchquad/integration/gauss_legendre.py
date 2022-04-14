@@ -46,7 +46,9 @@ class GaussLegendre(BaseIntegrator):
 
         self._dim = dim
         self._fn = fn
-        with torch.no_grad():
+        #with torch.no_grad(): #should already be like this since no nn
+        @torch.jit.script
+        def test_jit():
             for ires in range(N, max_N + 1): #if starting at npoints=8
                 npoints = base ** ires #is this standard?
                 #print(f"npoints {npoints}")
@@ -98,5 +100,7 @@ class GaussLegendre(BaseIntegrator):
                 if i.size == 0:
                     break
 
-        logger.info(f"Computed integral was {integral}.")
-        return integral
+            logger.info(f"Computed integral was {integral}.")
+            return integral
+        _ = test_jit() #compile?
+        return test_jit()
