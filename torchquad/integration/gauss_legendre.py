@@ -68,10 +68,10 @@ class GaussLegendre(BaseIntegrator):
                     xi=aa.new(xi)
                     wi=aa.new(wi)
 
-                try:
+                if xm.device !='cpu':
                     xi=do("repeat",xm,npoints,like="numpy").reshape(self._dim,npoints)+anp.outer(xl,xi)
                     #now xm has to be on CPU ... but xi needs to be on GPU
-                except TypeError:
+                else:
                     xi=do("repeat",xm.cpu(),npoints,like="numpy").reshape(self._dim,npoints).to(torch.cuda.current_device())+anp.outer(xl,xi)
                 wi=anp.outer(wi,xl).T
                 
