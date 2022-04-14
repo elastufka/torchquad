@@ -91,7 +91,7 @@ class GaussLegendre(BaseIntegrator):
         else:
             integral = torch.sum(self._eval(xi,args=args)*wi,axis=1) #integral from a to b f(x) ≈ sum (w_i*f(x_i))
             if fixed:
-                break #no error evaluation if fixed-point quadrature desired
+                pass#break #no error evaluation if fixed-point quadrature desired
 
         #print(npoints,integral)
         # Convergence criterion
@@ -107,7 +107,7 @@ class GaussLegendre(BaseIntegrator):
 
         # If all point have reached criterion return value
         if i.size == 0:
-            break
+            pass#break
 
         #logger.info(f"Computed integral was {integral}.")
         return integral
