@@ -81,7 +81,7 @@ class GaussLegendre(BaseIntegrator):
             all_weights.append(wi.flatten())
             
         #logger.debug("Evaluating integrand for {xi}.")
-        all_eval=self._eval(all_points, args=args)*all_weights
+        all_eval=self._eval(torch.cat(all_points), args=args)*torch.cat(all_weights)
         
         #now reshape based on dim, npoints... does this have to be done in loop? booo.....
     
