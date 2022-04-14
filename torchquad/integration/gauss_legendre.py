@@ -93,7 +93,7 @@ class GaussLegendre(BaseIntegrator):
         #try foor loop to start
         for ires in range(N+1, max_N + 1):
             npoints=base**ires
-            integral[i] = anp.sum(all_eval[self._dim*base**(ires-1):base*self._dim*npoints].reshape(self._dim,npoints),axis=1) #[a[i.tolist()] for a in args]
+            integral[i] = anp.sum(all_eval[self._dim*base**(ires-1):self._dim*base**(ires+1)].reshape(self._dim,npoints),axis=1) #[a[i.tolist()] for a in args]
         #else:
         #    integral = anp.sum(self._eval(xi,args=args)*wi,axis=1) #integral from a to b f(x) ≈ sum (w_i*f(x_i))
 
