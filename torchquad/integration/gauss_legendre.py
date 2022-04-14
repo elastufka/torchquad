@@ -48,7 +48,7 @@ class GaussLegendre(BaseIntegrator):
         self._fn = fn
         #with torch.no_grad(): #should already be like this since no nn
         @torch.jit.script
-        def test_jit(N=N,max_N=max_N,base=base):
+        def test_jit(N:int=N,max_N : int=max_N,base :int =base):
             for ires in range(N, max_N + 1): #if starting at npoints=8
                 npoints = base ** ires #is this standard?
                 #print(f"npoints {npoints}")
