@@ -3,10 +3,69 @@ import numpy
 from loguru import logger
 from autoray import numpy as anp
 from autoray import do
+from scipy.special import lpmv
 
 from .base_integrator import BaseIntegrator
 from .utils import _setup_integration_domain
 
+
+def gauss_legendre0(x1, x2, npoints):
+    """
+    Calculate the positions and weights for a Gauss-Legendre integration scheme.
+
+    Parameters
+    ----------
+    x1 : `numpy.array`
+
+    x2 : `numpy.array`
+
+    npoints : `int`
+        Degree or number of points to create
+    Returns
+    -------
+    `tuple` :
+        (x, w) The positions and weights for the integration.
+
+    Notes
+    -----
+
+    Adapted from SSW
+    `Brm_GauLeg54.pro <https://hesperia.gsfc.nasa.gov/ssw/packages/xray/idl/brm/brm_gauleg54.pro>`_
+    """
+    eps = 3e-14
+    m = (npoints + 1) // 2
+
+    x = numpy.zeros((x1.size, npoints))
+    w = numpy.zeros((x1.size, npoints))
+
+    # Normalise from -1 to +1 as Legendre polynomial only valid in this range
+    xm = 0.5 * (x2 + x1)
+    xl = 0.5 * (x2 - x1)
+
+    for i in range(1, m + 1):
+
+        z = numpy.cos(numpy.pi * (i - 0.25) / (npoints + 0.5))
+        # Init to np.inf so loop runs at least once
+        z1 = numpy.inf
+
+        # Some kind of integration/update loop
+        while numpy.abs(z - z1) > eps:
+            # Evaluate Legendre polynomial of degree npoints at z points P_m^l(z) m=0, l=npoints
+            p1 = lpmv(0, npoints, z)
+            p2 = lpmv(0, npoints - 1, z)
+
+            pp = npoints * (z * p1 - p2) / (z ** 2 - 1.0)
+
+            z1 = numpy.copy(z)
+            z = z1 - p1 / pp
+
+        # Update ith components
+        x[:, i - 1] = xm - xl * z
+        x[:, npoints - i] = xm + xl * z
+        w[:, i - 1] = 2.0 * xl / ((1.0 - z ** 2) * pp ** 2)
+        w[:, npoints - i] = w[:, i - 1]
+
+    return x, w
 
 class GaussLegendre(BaseIntegrator):
     """Gauss Legendre quadrature rule in torch. See https://en.wikipedia.org/wiki/Gaussian_quadrature#Gauss%E2%80%93Legendre_quadrature."""
@@ -58,23 +117,24 @@ class GaussLegendre(BaseIntegrator):
                     break
 
                 # generate positions and weights
-                xi, wi = numpy.polynomial.legendre.leggauss(npoints)#self._gauss_legendre(npoints)  #(dim,n)
-                #scale from [-1,1] to [a,b] e.g. https://en.wikipedia.org/wiki/Gaussian_quadrature#Change_of_interval
                 a,b=self._integration_domain.T
-                xm=0.5*(b+a)
-                xl=0.5*(b-a)
-                if isinstance(xm,torch.Tensor):
-                    #for now... figure out a better solution later
-                    aa=torch.randn(npoints)
-                    xi=aa.new(xi)
-                    wi=aa.new(wi)
+                xi, wi = gauss_legendre0(a,b,npoints) #numpy.polynomial.legendre.leggauss(npoints)#self._gauss_legendre(npoints)  #(dim,n)
+                #scale from [-1,1] to [a,b] e.g. https://en.wikipedia.org/wiki/Gaussian_quadrature#Change_of_interval
+                #
+                #xm=0.5*(b+a)
+                #xl=0.5*(b-a)
+                #if isinstance(xm,torch.Tensor):
+                #    #for now... figure out a better solution later
+                #    aa=torch.randn(npoints)
+                #    xi=aa.new(xi)
+                #    wi=aa.new(wi)
 
-                if xm.device !='cpu':
-                    xi=do("repeat",xm,npoints,like="numpy").reshape(self._dim,npoints)+anp.outer(xl,xi)
+                #if xm.device !='cpu':
+                    #xi=do("repeat",xm,npoints,like="numpy").reshape(self._dim,npoints)+anp.outer(xl,xi)
                     #now xm has to be on CPU ... but xi needs to be on GPU
-                else:
-                    xi=do("repeat",xm.cpu(),npoints,like="numpy").reshape(self._dim,npoints).to(torch.cuda.current_device())+anp.outer(xl,xi)
-                wi=anp.outer(wi,xl).T
+                #else:
+                    #xi=do("repeat",xm.cpu(),npoints,like="numpy").reshape(self._dim,npoints).to(torch.cuda.current_device())+anp.outer(xl,xi)
+                #wi=anp.outer(wi,xl).T
                 
                 logger.debug("Evaluating integrand for {xi}.")
                 if self._nr_of_fevals > 0:
