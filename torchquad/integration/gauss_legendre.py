@@ -57,7 +57,7 @@ class GaussLegendre(BaseIntegrator):
                     break
 
                 # generate positions and weights
-                xi, wi = self._gauss_legendre(npoints)  #(dim,n)
+                xi, wi = do("polynomial.legendre.leggauss",npoints,like="numpy")#self._gauss_legendre(npoints)  #(dim,n)
                 #scale from [-1,1] to [a,b] e.g. https://en.wikipedia.org/wiki/Gaussian_quadrature#Change_of_interval
                 a,b=self._integration_domain.T
                 xm=0.5*(b+a)
