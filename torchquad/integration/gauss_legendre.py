@@ -85,29 +85,31 @@ class GaussLegendre(BaseIntegrator):
         
         #now reshape based on dim, npoints... does this have to be done in loop? booo.....
     
-        if self._nr_of_fevals > 0:
-            lastsum = anp.array(integral)
-            integral[i] = anp.sum(self._eval(xi[i], args=args)*wi[i],axis=1) #[a[i.tolist()] for a in args]
-        else:
-            integral = torch.sum(self._eval(xi,args=args)*wi,axis=1) #integral from a to b f(x) ≈ sum (w_i*f(x_i))
-            if fixed:
-                pass#break #no error evaluation if fixed-point quadrature desired
+        #if self._nr_of_fevals > 0:
+        lastsum = anp.sum(all_eval[:self._dim*base**N].reshape(self._dim,base**N),axis=1) #anp.array(integral)
+        if fixed:
+            return lastsum
+        i= anp.arange(self._dim)
+        #try foor loop to start
+        for ires in range(N+1, max_N + 1):
+            npoints=base**ires
+            integral[i] = anp.sum(all_eval[self._dim*base**(ires-1):self._dim*npoints].reshape(self._dim,npoints),axis=1) #[a[i.tolist()] for a in args]
+        #else:
+        #    integral = anp.sum(self._eval(xi,args=args)*wi,axis=1) #integral from a to b f(x) ≈ sum (w_i*f(x_i))
 
-        #print(npoints,integral)
-        # Convergence criterion
-        if self._nr_of_fevals//self._dim > 1:
+            # Convergence criterion
             l1 = anp.abs(integral - lastsum)
             if eps_abs is not None:
                 i = anp.where(l1 > eps_abs)[0]
             if eps_rel is not None:
                 l2 = eps_rel * anp.abs(integral)
                 i = anp.where(l1 > l2)[0]
-        else:
-            i= anp.arange(self._dim) #indices of integral
+            #else:
+            #    i= anp.arange(self._dim) #indices of integral
 
-        # If all point have reached criterion return value
-        if i.size == 0:
-            pass#break
+            # If all point have reached criterion return value
+            if i.size == 0:
+                pass#break
 
         #logger.info(f"Computed integral was {integral}.")
         return integral
