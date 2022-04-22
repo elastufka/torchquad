@@ -91,7 +91,7 @@ class Gaussian(BaseIntegrator):
 
         return integral
         
-    def integrate_iterative(self, fn, dim, args=None, startN=2,base=2,maxN=12,eps_rel=1e-3,eps_abs=None, integration_domain=None):
+    def integrate_iterative(self, fn, dim, args=None, N=2,base=2,maxN=12,eps_rel=1e-3,eps_abs=None, integration_domain=None):
         """Integrates the passed function on the passed domain using fixed-point Gaussian quadrature.
 
         Args:
@@ -118,7 +118,7 @@ class Gaussian(BaseIntegrator):
         self._dim = dim
         self._fn = fn
         
-        for ires in range(startN, max_N + 1):
+        for ires in range(N, max_N + 1):
             npoints = base ** ires
             if npoints > base**max_N:
                 raise ValueError(f"Integral did not satisfy the conditions eps_abs={eps_abs} or eps_rel={eps_rel} using the maximum number of points {base**max_N}") #or a different error?
