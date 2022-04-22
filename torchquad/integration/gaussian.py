@@ -86,7 +86,7 @@ class Gaussian(BaseIntegrator):
         root_args=(N,)+self.root_args
         
         xi, wi = self._points_and_weights(self.root_fn,root_args,wrapper_func=self.wrapper_func)
-        integral= anp.sum(self._eval(xi,args=args,weights=wi)) #what if there is a sum in the function? then wi*self._eval() will have dimension mismatch
+        integral= anp.sum(self._eval(xi,args=args,weights=wi),axis=1) #what if there is a sum in the function? then wi*self._eval() will have dimension mismatch
         logger.info(f"Computed integral was {integral}.")
 
         return integral
