@@ -91,7 +91,7 @@ class Gaussian(BaseIntegrator):
 
         return integral
         
-    def integrate_iterative(self, fn, dim, args=None, N=2,base=2,maxN=12,eps_rel=1e-3,eps_abs=None, integration_domain=None):
+    def integrate_iterative(self, fn, dim, args=None, N=2,base=2,max_N=12,eps_rel=1e-3,eps_abs=None, integration_domain=None):
         """Integrates the passed function on the passed domain using fixed-point Gaussian quadrature.
 
         Args:
