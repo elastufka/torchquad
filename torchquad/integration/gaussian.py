@@ -121,11 +121,12 @@ class Gaussian(BaseIntegrator):
         
         for ires in range(N, max_N + 1):
             npoints = base ** ires
+            logger.info(f"intgrating with {npoints} points")
             if npoints > base**max_N:
                 raise ValueError(f"Integral did not satisfy the conditions eps_abs={eps_abs} or eps_rel={eps_rel} using the maximum number of points {base**max_N}") #or a different error?
                 break
                 
-            root_args=(ires,)+self.root_args
+            root_args=(npoints,)+self.root_args
         
             xi, wi = self._points_and_weights(self.root_fn,root_args,wrapper_func=self.wrapper_func)
             
@@ -143,7 +144,7 @@ class Gaussian(BaseIntegrator):
                     l2 = eps_rel * anp.abs(integral)
                     i = anp.where(l1 > l2)[0]
             if i.size == 0:
-                logger.info(f"Relative error condition eps_rel={eps_rel} met with {ires} points")
+                logger.info(f"Relative error condition eps_rel={eps_rel} met with {npoints} points")
                 break
             
         logger.info(f"Computed integral was {integral}.")
