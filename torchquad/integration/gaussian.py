@@ -70,7 +70,7 @@ class Gaussian(BaseIntegrator):
             float: integral value
 
         """
-        if not integration_domain or self.name in ["Gauss-Laguerre","Gauss-Hermite"]:
+        if integration_domain is None or self.name in ["Gauss-Laguerre","Gauss-Hermite"]:
             integration_domain=self.default_integration_domain*dim
             if self.name in ["Gauss-Laguerre","Gauss-Hermite"]:
                 logger.info(f"{self.name} integration only allowed over the interval {self.default_integration_domain[0]}!")
