@@ -117,7 +117,7 @@ class Gaussian(BaseIntegrator):
 
         self._dim = dim
         self._fn = fn
-        integral=anp.zeros_like(dim)
+        integral=anp.zeros(dim)
         
         for ires in range(N, max_N + 1):
             npoints = base ** ires
