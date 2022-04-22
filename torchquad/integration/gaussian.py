@@ -143,6 +143,7 @@ class Gaussian(BaseIntegrator):
                     l2 = eps_rel * anp.abs(integral)
                     i = anp.where(l1 > l2)[0]
             if i.size == 0:
+                logger.info(f"Relative error condition eps_rel={eps_rel} met with {ires} points")
                 break
             
         logger.info(f"Computed integral was {integral}.")
