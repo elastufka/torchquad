@@ -117,6 +117,7 @@ class Gaussian(BaseIntegrator):
 
         self._dim = dim
         self._fn = fn
+        integral=anp.zeros_like(dim)
         
         for ires in range(N, max_N + 1):
             npoints = base ** ires
@@ -131,7 +132,7 @@ class Gaussian(BaseIntegrator):
             if self._nr_of_fevals ==0:
                 lastsum= anp.sum(self._eval(xi,args=args,weights=wi),axis=1)
                 i= anp.arange(self._dim) #indices of integral
-                integral=numpy.array(lastsum)
+                integral[i]=lastsum
             else:
                 integral[i]= anp.sum(self._eval(xi[i],args=args,weights=wi[i]),axis=1)
                 l1 = anp.abs(integral - lastsum)
