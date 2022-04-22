@@ -90,6 +90,61 @@ class Gaussian(BaseIntegrator):
         logger.info(f"Computed integral was {integral}.")
 
         return integral
+        
+    def integrate_iterative(self, fn, dim, args=None, startN=2,base=2,maxN=12,eps_rel=1e-3,eps_abs=None, integration_domain=None):
+        """Integrates the passed function on the passed domain using fixed-point Gaussian quadrature.
+
+        Args:
+            fn (func): The function to integrate over.
+            dim (int): Dimensionality of the function to integrate.
+            args (iterable object, optional): Additional arguments ``t0, ..., tn``, required by `fn`.
+            N (int, optional): Degree to use for computing sample points and weights. Defaults to 8.
+            integration_domain (list, optional): Integration domain, e.g. [[-1,1],[0,1]]. Defaults to [-1,1]^dim.
+
+        Returns:
+            float: integral value
+
+        """
+        if integration_domain is None or self.name in ["Gauss-Laguerre","Gauss-Hermite"]:
+            integration_domain=self.default_integration_domain*dim
+            if self.name in ["Gauss-Laguerre","Gauss-Hermite"]:
+                logger.info(f"{self.name} integration only allowed over the interval {self.default_integration_domain[0]}!")
+                self.transform_interval=False
+        self._integration_domain = _setup_integration_domain(dim, integration_domain)
+        self._check_inputs(dim=dim, N=N, integration_domain=self._integration_domain)
+
+        logger.debug(f"Using {self.name} for integrating a fn with {N} points over {self._integration_domain}")
+
+        self._dim = dim
+        self._fn = fn
+        
+        for ires in range(startN, max_N + 1):
+            npoints = base ** ires
+            if npoints > base**max_N:
+                raise ValueError(f"Integral did not satisfy the conditions eps_abs={eps_abs} or eps_rel={eps_rel} using the maximum number of points {base**max_N}") #or a different error?
+                break
+                
+            root_args=(ires,)+self.root_args
+        
+            xi, wi = self._points_and_weights(self.root_fn,root_args,wrapper_func=self.wrapper_func)
+            
+            if self._nr_of_fevals ==0:
+                lastsum= anp.sum(self._eval(xi,args=args,weights=wi),axis=1)
+                i= anp.arange(self._dim) #indices of integral
+            else:
+                integral[i]= anp.sum(self._eval(xi[i],args=args,weights=wi[i]),axis=1)
+                l1 = anp.abs(integral - lastsum)
+                if eps_abs is not None:
+                    i = anp.where(l1 > eps_abs)[0]
+                if eps_rel is not None:
+                    l2 = eps_rel * anp.abs(integral)
+                    i = anp.where(l1 > l2)[0]
+            if i.size == 0:
+                break
+            
+        logger.info(f"Computed integral was {integral}.")
+
+        return integral
 
 
 class GaussLegendre(Gaussian):
