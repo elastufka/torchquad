@@ -135,14 +135,13 @@ class Gaussian(BaseIntegrator):
                 i= [True for j in range(self._dim)]
                 lastsum= anp.sum(self._eval(xi,args=args,weights=wi),axis=1)
                 if isinstance(lastsum,torch.Tensor):
-                    integral=lastsum.new(lastsum)
+                    integral=lastsum.clone().detach()
                 else:
-                    integral[i]=lastsum
+                    integral[i]=lastsum[i]
 
             else:
                 integral[i]= anp.sum(self._eval(xi[i],args=args,weights=wi[i]),axis=1)
                 l1 = anp.abs(integral - lastsum)
-                lastsum[i]=integral[i]
                 if eps_abs is not None:
                     i = l1 > eps_abs #bool list
                 if eps_rel is not None:
@@ -150,6 +149,7 @@ class Gaussian(BaseIntegrator):
                     i = l1 > l2
                     logger.info(f"l1 {l1}")
                     logger.info(f"l2 {l2}")
+                lastsum[i]=integral[i]
             if not any(i):
                 logger.info(f"Relative error condition eps_rel={eps_rel} met with {npoints} points")
                 break
