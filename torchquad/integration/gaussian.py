@@ -117,8 +117,8 @@ class Gaussian(BaseIntegrator):
 
         self._dim = dim
         self._fn = fn
-        integral=anp.zeros(dim)
-        lastsum=anp.zeros_like(integral)
+        #integral=anp.zeros(dim)
+        #lastsum=anp.zeros_like(integral)
         
         for ires in range(N, max_N + 1):
             npoints = base ** ires
@@ -132,22 +132,24 @@ class Gaussian(BaseIntegrator):
             xi, wi = self._points_and_weights(self.root_fn,root_args,wrapper_func=self.wrapper_func)
             
             if self._nr_of_fevals ==0:
-                i= anp.arange(self._dim) #indices of integral
+                i= anp.ones(self._dim) #array/tensor of True
+                lastsum= anp.sum(self._eval(xi,args=args,weights=wi),axis=1)
                 if isinstance(xi,torch.Tensor):
-                    lastsum= anp.sum(self._eval(xi,args=args,weights=wi),axis=1)
                     integral=torch.Tensor(integral)
                 else:
-                    lastsum[i]=anp.sum(self._eval(xi,args=args,weights=wi),axis=1)
-                    integral[i]=lastsum
+                    integral=lastsum
+                #else:
+                #    lastsum[i]=anp.sum(self._eval(xi,args=args,weights=wi),axis=1)
+                #    integral[i]=lastsum
             else:
                 integral[i]= anp.sum(self._eval(xi[i],args=args,weights=wi[i]),axis=1)
                 l1 = anp.abs(integral - lastsum)
                 lastsum[i]=integral[i]
                 if eps_abs is not None:
-                    i = anp.where(l1 > eps_abs)[0]
+                    i = l1 > eps_abs #bool array now
                 if eps_rel is not None:
                     l2 = eps_rel * anp.abs(integral)
-                    i = anp.where(l1 > l2)[0]
+                    i = l1 > l2
             if i.size == 0:
                 logger.info(f"Relative error condition eps_rel={eps_rel} met with {npoints} points")
                 break
