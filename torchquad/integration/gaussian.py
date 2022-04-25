@@ -148,12 +148,13 @@ class Gaussian(BaseIntegrator):
                 if eps_rel is not None:
                     l2 = eps_rel * anp.abs(integral)
                     i = l1 > l2
-                    logger.info(f"i of length {len(i)}")
+                    logger.info(f"l1 {l1}")
+                    logger.info(f"l2 {l2}")
             if not any(i):
                 logger.info(f"Relative error condition eps_rel={eps_rel} met with {npoints} points")
                 break
             
-        logger.info(f"Computed integral was {integral}.")
+        #logger.info(f"Computed integral was {integral}.")
 
         return integral
 
