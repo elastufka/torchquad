@@ -49,7 +49,7 @@ class Gaussian(BaseIntegrator):
                 wi=aa.new(wi)
 
             if xm.device !='cpu': #xi and xm need to be on same device
-                xi=do("repeat",xm,n,like="numpy").reshape(self._dim,n)+anp.outer(xl,xi)
+                xi=torch.Tensor(do("repeat",xm.cpu().numpy(),n,like="numpy").reshape(self._dim,n))+anp.outer(xl,xi)
             else:
                 xi=do("repeat",xm.cpu(),n,like="numpy").reshape(self._dim,n).to(torch.cuda.current_device())+anp.outer(xl,xi) #what if backend isn't torch?
             wi=anp.outer(wi,xl).T
