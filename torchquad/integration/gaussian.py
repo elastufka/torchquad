@@ -137,7 +137,7 @@ class Gaussian(BaseIntegrator):
                     lastsum= anp.sum(self._eval(xi,args=args,weights=wi),axis=1)
                     integral=torch.Tensor(integral)
                 else:
-                    lastsum[i]anp.sum(self._eval(xi,args=args,weights=wi),axis=1)
+                    lastsum[i]=anp.sum(self._eval(xi,args=args,weights=wi),axis=1)
                     integral[i]=lastsum
             else:
                 integral[i]= anp.sum(self._eval(xi[i],args=args,weights=wi[i]),axis=1)
