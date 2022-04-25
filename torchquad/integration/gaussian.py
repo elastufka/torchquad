@@ -117,7 +117,7 @@ class Gaussian(BaseIntegrator):
 
         self._dim = dim
         self._fn = fn
-        #integral=anp.zeros(dim)
+        integral=anp.zeros(dim)
         #lastsum=anp.zeros_like(integral)
         
         for ires in range(N, max_N + 1):
@@ -134,7 +134,7 @@ class Gaussian(BaseIntegrator):
             if self._nr_of_fevals ==0:
                 i= [True for j in range(self._dim)]
                 lastsum= anp.sum(self._eval(xi,args=args,weights=wi),axis=1)
-                integral=lastsum
+                integral[i]=lastsum
             else:
                 integral[i]= anp.sum(self._eval(xi[i],args=args,weights=wi[i]),axis=1)
                 l1 = anp.abs(integral - lastsum)
@@ -144,6 +144,7 @@ class Gaussian(BaseIntegrator):
                 if eps_rel is not None:
                     l2 = eps_rel * anp.abs(integral)
                     i = l1 > l2
+                    logger.info(f"i of length {len(i)}")
             if len(i) == 0:
                 logger.info(f"Relative error condition eps_rel={eps_rel} met with {npoints} points")
                 break
