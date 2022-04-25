@@ -132,25 +132,19 @@ class Gaussian(BaseIntegrator):
             xi, wi = self._points_and_weights(self.root_fn,root_args,wrapper_func=self.wrapper_func)
             
             if self._nr_of_fevals ==0:
-                i= anp.ones(self._dim) #array/tensor of True
+                i= [True for j in range(self._dim)]
                 lastsum= anp.sum(self._eval(xi,args=args,weights=wi),axis=1)
-                #if isinstance(xi,torch.Tensor):
-                #    integral=torch.Tensor(integral)
-                #else:
                 integral=lastsum
-                #else:
-                #    lastsum[i]=anp.sum(self._eval(xi,args=args,weights=wi),axis=1)
-                #    integral[i]=lastsum
             else:
                 integral[i]= anp.sum(self._eval(xi[i],args=args,weights=wi[i]),axis=1)
                 l1 = anp.abs(integral - lastsum)
                 lastsum[i]=integral[i]
                 if eps_abs is not None:
-                    i = l1 > eps_abs #bool array now
+                    i = l1 > eps_abs #bool list
                 if eps_rel is not None:
                     l2 = eps_rel * anp.abs(integral)
                     i = l1 > l2
-            if i.size == 0:
+            if len(i) == 0:
                 logger.info(f"Relative error condition eps_rel={eps_rel} met with {npoints} points")
                 break
             
