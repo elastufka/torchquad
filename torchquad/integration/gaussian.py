@@ -134,10 +134,10 @@ class Gaussian(BaseIntegrator):
             if self._nr_of_fevals ==0:
                 i= anp.ones(self._dim) #array/tensor of True
                 lastsum= anp.sum(self._eval(xi,args=args,weights=wi),axis=1)
-                if isinstance(xi,torch.Tensor):
-                    integral=torch.Tensor(integral)
-                else:
-                    integral=lastsum
+                #if isinstance(xi,torch.Tensor):
+                #    integral=torch.Tensor(integral)
+                #else:
+                integral=lastsum
                 #else:
                 #    lastsum[i]=anp.sum(self._eval(xi,args=args,weights=wi),axis=1)
                 #    integral[i]=lastsum
