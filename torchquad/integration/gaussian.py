@@ -142,14 +142,12 @@ class Gaussian(BaseIntegrator):
             else:
                 integral[i]= anp.sum(self._eval(xi[i],args=args,weights=wi[i]),axis=1)
                 l1 = anp.abs(integral - lastsum)
+                lastsum[i]=integral[i]
                 if eps_abs is not None:
                     i = l1 > eps_abs #bool list
                 if eps_rel is not None:
                     l2 = eps_rel * anp.abs(integral)
                     i = l1 > l2
-                    logger.info(f"l1 {l1}")
-                    logger.info(f"l2 {l2}")
-                lastsum[i]=integral[i]
             if not any(i):
                 logger.info(f"Relative error condition eps_rel={eps_rel} met with {npoints} points")
                 break
