@@ -149,7 +149,7 @@ class Gaussian(BaseIntegrator):
                     l2 = eps_rel * anp.abs(integral)
                     i = l1 > l2
                     logger.info(f"i of length {len(i)}")
-            if len(i) == 0:
+            if not any(i):
                 logger.info(f"Relative error condition eps_rel={eps_rel} met with {npoints} points")
                 break
             
